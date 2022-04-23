@@ -9,27 +9,33 @@ const main = async () => {
 
     app.use(
         cors({
-            origin: ["http://localhost:3000", "http://localhost:3001"],
-            credentials: true,
+            origin: "*",
+            methods: ["GET", "POST"],
         })
     );
 
-
     const server = http.createServer(app);
+
     const io = new Server(
         server, {
         cors: {
-            origin: ["http://localhost:3000", "http://localhost:3001"],
-            credentials: true,
-            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            origin: "*",
+            methods: ["GET", "POST"],
         }
     })
 
 
     io.on('connection', (socket) => {
-        console.log('a user connected', socket.id);
-        socket.on('disconnect', () => {
-            console.log('user disconnected');
+        socket.on("join_room", (room) => {
+            socket.join(room);
+        });
+
+        socket.on("send_message", (data) => {
+            socket.to(data.room).emit("receive_message", data);
+        });
+
+        socket.on("disconnect", () => {
+            console.log("User Disconnected", socket.id);
         });
     })
 
@@ -37,9 +43,6 @@ const main = async () => {
     app.get('/', (_, res) => {
         res.send('Hello World!');
     });
-
-
-
 
     const port = process.env.PORT || 4000;
 
