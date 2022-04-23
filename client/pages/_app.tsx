@@ -4,8 +4,6 @@ import Head from "next/head";
 import { MantineProvider } from "@mantine/core";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:4000");
-
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
