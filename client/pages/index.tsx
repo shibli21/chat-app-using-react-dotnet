@@ -5,7 +5,7 @@ import { FormEvent, useState } from "react";
 import { io } from "socket.io-client";
 import Chat from "../components/Chat";
 
-const socket = io("http://localhost:4000");
+const socket = io(process.env.NEXT_PUBLIC_SERVER_URL);
 
 const Home: NextPage = () => {
   const [name, setName] = useState("s");
