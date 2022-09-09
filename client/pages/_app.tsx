@@ -1,13 +1,12 @@
 import { MantineProvider } from "@mantine/core";
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Socket Chat App</title>
+        <title>REACT DOTNET CHAT</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
       </Head>
 
@@ -17,7 +16,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         theme={{
           colorScheme: "dark",
           primaryColor: "violet",
-          fontFamily: "monospace",
+          fontFamily: "cursive",
         }}
       >
         <Component {...pageProps} />

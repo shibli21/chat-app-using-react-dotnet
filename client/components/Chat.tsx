@@ -1,40 +1,25 @@
-import { ActionIcon, Avatar, Box, Center, Input, Text, useMantineTheme } from "@mantine/core";
-import React, { FormEvent, useEffect, useRef, useState } from "react";
-import { Socket } from "socket.io-client";
-import { Send } from "tabler-icons-react";
-
-interface IMessage {
-  name: string;
-  message: string;
-  time: string;
-  room: string;
-}
+import { ActionIcon, Box, Center, Input, Text, useMantineTheme } from "@mantine/core";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { Logout, Send } from "tabler-icons-react";
+import { IMessage } from "../pages";
 
 interface ChatProps {
-  socket: Socket;
+  messages: IMessage[];
+  onSendMessage: (message: string) => void;
+  onCloseConnection: () => void;
   name: string;
   room: string;
 }
 
-const Chat = ({ name, room, socket }: ChatProps) => {
+const Chat = ({ name, room, messages, onSendMessage, onCloseConnection }: ChatProps) => {
   const [currentMessage, setCurrentMessage] = useState("");
-  const [messageList, setMessageList] = useState<IMessage[]>([]);
+
   const ref = useRef<HTMLDivElement>(null);
   const theme = useMantineTheme();
 
   const sendMessage = () => {
-    if (currentMessage !== "") {
-      const messageData: IMessage = {
-        room: room,
-        name: name,
-        message: currentMessage,
-        time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes(),
-      };
-
-      socket.emit("send_message", messageData);
-      setMessageList((list) => [...list, messageData]);
-      setCurrentMessage("");
-    }
+    onSendMessage(currentMessage);
+    setCurrentMessage("");
   };
 
   const scrollToBottom = () => {
@@ -42,14 +27,8 @@ const Chat = ({ name, room, socket }: ChatProps) => {
   };
 
   useEffect(() => {
-    socket.off("receive_message").on("receive_message", (data) => {
-      setMessageList((list) => [...list, data]);
-    });
-  }, [socket]);
-
-  useEffect(() => {
     scrollToBottom();
-  }, [messageList]);
+  }, [messages]);
 
   return (
     <>
@@ -65,11 +44,18 @@ const Chat = ({ name, room, socket }: ChatProps) => {
           },
         })}
       >
-        <Box sx={(theme) => ({ background: theme.colors.violet[8], height: "30px" })}>
-          <Center>
+        <Box sx={(theme) => ({ background: theme.colors.violet[8] })}>
+          <Center
+            px={10}
+            sx={{
+              justifyContent: "space-between",
+            }}
+          >
             <Text transform="uppercase" size="lg" weight={700}>
-              Live Chat
+              {room}
             </Text>
+
+            <Logout cursor="pointer" size={20} onClick={onCloseConnection} />
           </Center>
         </Box>
         <Box
@@ -101,14 +87,14 @@ const Chat = ({ name, room, socket }: ChatProps) => {
               },
             })}
           >
-            {messageList.map((messageContent) => {
+            {messages.map((messageContent, i) => {
               return (
                 <Box
-                  key={messageContent.name}
+                  key={messageContent.user}
                   sx={{
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: name === messageContent.name ? "flex-start" : "flex-end",
+                    alignItems: name === messageContent.user ? "flex-start" : "flex-end",
                   }}
                 >
                   <Box
@@ -116,19 +102,17 @@ const Chat = ({ name, room, socket }: ChatProps) => {
                       display: "flex",
                       gap: "10px",
                       alignItems: "flex-start",
-                      flexDirection: name !== messageContent.name ? "row-reverse" : "row",
+                      flexDirection: name !== messageContent.user ? "row-reverse" : "row",
                       maxWidth: "250px",
                     }}
                   >
-                    <Avatar src={null} size="md" alt="no image here" />
+                    <Box sx={{ display: "flex", gap: "10px", margin: "5px 5px 5px 0" }}>
+                      <Text size="xs">{messageContent.user}</Text>
+                    </Box>
                     <Box>
                       <Text sx={{ background: theme.colors.gray[8], padding: "2px 2px", lineHeight: 1 }}>
                         {messageContent.message}
                       </Text>
-                      <Box sx={{ display: "flex", gap: "10px", margin: "2px 0" }}>
-                        <Text size="xs">{messageContent.name}</Text>
-                        <Text size="xs">{messageContent.time}</Text>
-                      </Box>
                     </Box>
                   </Box>
                 </Box>
